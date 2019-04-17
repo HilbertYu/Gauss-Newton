@@ -114,7 +114,7 @@ public:
 
     RowVector run(RowVector b)
     {
-        const int max_iter = 10;
+        const int max_iter = 20;
 
         for (int i = 0; i < max_iter; ++i)
         {
@@ -123,6 +123,9 @@ public:
 
             Matrix T = Jt*J;
             RowVector bn = T.solve(Jt*res(b));
+
+            double err = sqrt(bn(0)*bn(0) + bn(1)*bn(1) + bn(2)*bn(2));
+        //    printf("err = %.5lf\n", err);
 
             b = b + bn;
         }
@@ -155,11 +158,6 @@ int main(int argc, const char * argv[])
         ++ix;
 
     };
-
-    for (auto pt: gn.pts)
-    {
-        printf("%.3lf, %.3lf\n",pt.x, pt.y);
-    }
 
     gn.dim_data = gn.pts.size();
 
