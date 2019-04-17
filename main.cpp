@@ -95,7 +95,7 @@ public:
         return ret_v;
     }
 
-    Matrix Jf(double x, RowVector b)
+    Matrix Jf(RowVector b)
     {
         const int N = pts.size();
         Matrix ret_f(N, 3);
@@ -104,7 +104,7 @@ public:
         {
             for (int j = 0; j < 3; ++j)
             {
-                ret_f(ir, j) = grad_f(x, b)(j);
+                ret_f(ir, j) = grad_f(pts[ir].x, b)(j);
             }
 
         }
@@ -112,32 +112,65 @@ public:
 
     }
 
+    RowVector run(RowVector b)
+    {
+        const int max_iter = 10;
+
+        for (int i = 0; i < max_iter; ++i)
+        {
+            Matrix J = Jf(b);
+            Matrix Jt = J.transpose();
+
+            Matrix T = Jt*J;
+            RowVector bn = T.solve(Jt*res(b));
+
+            b = b + bn;
+        }
+
+        return b;
+
+
+    }
 
 
 };
 
 
+    // int val;
+    // while (cin >> val)
+    // {
+    //     cout << val << endl;
+    //
+    // };
+    //
+    // return 0;
+
+
 
 int main(int argc, const char * argv[])
 {
-//template <int dim_b, int dim_data>
+    using namespace std;
+
     GaussNewton gn;
     gn.dim_data = 3;
 
-    gn.pts.push_back(GaussNewton::Point(-1, 1));
+
+    gn.pts.push_back(GaussNewton::Point(-1, 5));
     gn.pts.push_back(GaussNewton::Point(0, 10));
-    gn.pts.push_back(GaussNewton::Point(1, 1));
+    gn.pts.push_back(GaussNewton::Point(1, 5));
+
+    RowVector b(3);
+    b(0) = 1;
+    b(1) = 0;
+    b(2) = 1;
+
+    RowVector fb = gn.run(b);
 
     for (double x = -5; x < 5; x += 0.05)
     {
-        RowVector b(3);
-        b(0) = 1;
-        b(1) = 0;
-        b(2) = 1;
+        double vf = gn.f(x, fb);
 
-        double vf = gn.f(x, b);
-        printf("%.3lf\n", vf);
-
+        printf("%.3lf, %.3lf\n",x, vf);
     }
 
     return 0;
