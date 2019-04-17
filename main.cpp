@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
+#include <iostream>
 
+#include <vector>
 #include <octave/oct.h>
 #include <octave/octave.h>
 #include <octave/parse.h>
@@ -11,7 +13,7 @@
 
 //vb = A, mu, sigma
 
-template <int dim_b, int dim_data>
+//template <int dim_b, int dim_data>
 class GaussNewton
 {
     double g(double x, RowVector b)
@@ -38,16 +40,48 @@ class GaussNewton
         return (1.0/(s*s*s))*(x - mu)*(x - mu);
     }
 public:
+    class Point
+    {
+    public:
+        double x;
+        double y;
+        Point(double _x, double _y):
+            x(_x),
+            y(_y)
+        {}
+
+    };
+
+    int dim_data;
+
+
+    std::vector<GaussNewton::Point> pts;
+
     double f(double x, RowVector b)
     {
         return b(0) * exp(g(x, b));
     }
 
+    ColumnVector res(RowVector b)
+    {
+        const int N = pts.size();
+        ColumnVector ret(N);
+
+        for (int i = 0; i < N; ++i)
+        {
+            double x = pts[i].x;
+            double y = pts[i].y;
+            ret(i) = y - f(x, b);
+        }
+        return ret;
+
+    }
+
     RowVector grad_f(double x, RowVector b)
     {
         double A = b(0);
-        double mu = b(1);
-        double s = b(2);
+        //double mu = b(1);
+       // double s = b(2);
 
         double f_A = f(x, b)/A;
         double f_mu = f(x, b) * g_mu(x, b);
@@ -61,6 +95,23 @@ public:
         return ret_v;
     }
 
+    Matrix Jf(double x, RowVector b)
+    {
+        const int N = pts.size();
+        Matrix ret_f(N, 3);
+
+        for (int ir = 0; ir < N; ++ ir)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                ret_f(ir, j) = grad_f(x, b)(j);
+            }
+
+        }
+        return ret_f;
+
+    }
+
 
 
 };
@@ -69,7 +120,13 @@ public:
 
 int main(int argc, const char * argv[])
 {
-    GaussNewton<-1,-1> gn;
+//template <int dim_b, int dim_data>
+    GaussNewton gn;
+    gn.dim_data = 3;
+
+    gn.pts.push_back(GaussNewton::Point(-1, 1));
+    gn.pts.push_back(GaussNewton::Point(0, 10));
+    gn.pts.push_back(GaussNewton::Point(1, 1));
 
     for (double x = -5; x < 5; x += 0.05)
     {
