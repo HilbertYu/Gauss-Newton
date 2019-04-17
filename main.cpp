@@ -9,24 +9,56 @@
 #include <octave/Array.h>
 
 
-//vb = a, mu, sigma
+//vb = A, mu, sigma
 
 template <int dim_b, int dim_data>
 class GaussNewton
 {
     double g(double x, RowVector b)
     {
-        double A = b(0);
+     //   double A = b(0);
         double mu = b(1);
         double s = b(2);
         double ret = -(x - mu)*(x - mu)/(2*s*s);
         return ret;
     }
 
+    double g_mu(double x, RowVector b)
+    {
+        double mu = b(1);
+        double s = b(2);
+
+        return (1.0/s)*(x - mu);
+    }
+
+    double g_s(double x, RowVector b)
+    {
+        double mu = b(1);
+        double s = b(2);
+        return (1.0/(s*s*s))*(x - mu)*(x - mu);
+    }
 public:
     double f(double x, RowVector b)
     {
         return b(0) * exp(g(x, b));
+    }
+
+    RowVector grad_f(double x, RowVector b)
+    {
+        double A = b(0);
+        double mu = b(1);
+        double s = b(2);
+
+        double f_A = f(x, b)/A;
+        double f_mu = f(x, b) * g_mu(x, b);
+        double f_s = f(x, b) * g_s(x, b);
+
+        RowVector ret_v(3);
+        ret_v(0) = f_A;
+        ret_v(1) = f_mu;
+        ret_v(2) = f_s;
+
+        return ret_v;
     }
 
 
