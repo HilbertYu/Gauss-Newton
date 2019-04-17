@@ -136,14 +136,6 @@ public:
 };
 
 
-    // int val;
-    // while (cin >> val)
-    // {
-    //     cout << val << endl;
-    //
-    // };
-    //
-    // return 0;
 
 
 
@@ -152,25 +144,37 @@ int main(int argc, const char * argv[])
     using namespace std;
 
     GaussNewton gn;
-    gn.dim_data = 3;
 
 
-    gn.pts.push_back(GaussNewton::Point(-1, 5));
-    gn.pts.push_back(GaussNewton::Point(0, 10));
-    gn.pts.push_back(GaussNewton::Point(1, 5));
+    int val;
+    int ix = 0;
+    while (cin >> val)
+    {
+       // cout << val << endl;
+        gn.pts.push_back(GaussNewton::Point(ix, val));
+        ++ix;
+
+    };
+
+    for (auto pt: gn.pts)
+    {
+        printf("%.3lf, %.3lf\n",pt.x, pt.y);
+    }
+
+    gn.dim_data = gn.pts.size();
 
     RowVector b(3);
-    b(0) = 1;
-    b(1) = 0;
+    b(0) = 1500;
+    b(1) = 90;
     b(2) = 1;
 
     RowVector fb = gn.run(b);
 
-    for (double x = -5; x < 5; x += 0.05)
+    for (auto pt: gn.pts)
     {
-        double vf = gn.f(x, fb);
+        double vf = gn.f(pt.x, fb);
 
-        printf("%.3lf, %.3lf\n",x, vf);
+        printf("%.3lf, %.3lf\n",pt.x, vf);
     }
 
     return 0;
